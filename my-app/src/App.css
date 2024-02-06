@@ -1,0 +1,144 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+
+const API_URL = 'https://jsonplaceholder.typicode.com/users';
+
+const App = () => {
+  const [users, setUsers] = useState([]);
+  const [newUser, setNewUser] = useState({
+    name: '',
+    username: '',
+    email: '',
+    address: {
+      street: '',
+      suite: '',
+      city: '',
+      zipcode: '',
+      geo: {
+        lat: '',
+        lng: '',
+      },
+    },
+    phone: '',
+    website: '',
+    company: {
+      name: '',
+      catchPhrase: '',
+      bs: '',
+    },
+  });
+  const [editingUser, setEditingUser] = useState(null);
+  const [editedUserData, setEditedUserData] = useState({
+    name: '',
+    username: '',
+    email: '',
+    address: {
+      street: '',
+      suite: '',
+      city: '',
+      zipcode: '',
+      geo: {
+        lat: '',
+        lng: '',
+      },
+    },
+    phone: '',
+    website: '',
+    company: {
+      name: '',
+      catchPhrase: '',
+      bs: '',
+    },
+  });
+
+  useEffect(() => {
+    axios.get(API_URL)
+      .then(response => setUsers(response.data))
+      .catch(error => console.error('Error fetching users:', error));
+  }, []);
+
+  const handleAddUser = () => {
+    axios.post(API_URL, newUser)
+      .then(response => setUsers(prevUsers => [...prevUsers, response.data]))
+      .catch(error => console.error('Error adding user:', error));
+  };
+
+  const handleEditUser = (id, updatedUser) => {
+    axios.put(`${API_URL}/${id}`, updatedUser)
+      .then(response => {
+        setUsers(prevUsers => prevUsers.map(user => (user.id === id ? response.data : user)));
+        setEditingUser(null);
+        setEditedUserData({
+          name: '',
+          username: '',
+          email: '',
+          address: {
+            street: '',
+            suite: '',
+            city: '',
+            zipcode: '',
+            geo: {
+              lat: '',
+              lng: '',
+            },
+          },
+          phone: '',
+          website: '',
+          company: {
+            name: '',
+            catchPhrase: '',
+            bs: '',
+          },
+        });
+      })
+      .catch(error => console.error('Error editing user:', error));
+  };
+
+  const handleDeleteUser = (id) => {
+    axios.delete(`${API_URL}/${id}`)
+      .then(() => setUsers(prevUsers => prevUsers.filter(user => user.id !== id)))
+      .catch(error => console.error('Error deleting user:', error));
+  };
+
+  return (
+    <div>
+      <h1>User Management</h1>
+
+      {/* Add new user form */}
+      <div>
+        <h2>Add User</h2>
+        {/* Input fields for adding a new user */}
+        {/* ... (previous code) */}
+        <button onClick={handleAddUser}>Add User</button>
+      </div>
+
+      {/* Display existing users */}
+      <div>
+        <h2>Users</h2>
+        <ul>
+          {users.map(user => (
+            <li key={user.id}>
+              <div>
+                {/* Display user details */}
+                {/* ... (previous code) */}
+              </div>
+              <div>
+                <button onClick={() => setEditingUser(user.id)}>Edit</button>
+                <button onClick={() => handleDeleteUser(user.id)}>Delete</button>
+              </div>
+              {editingUser === user.id && (
+                <div>
+                  {/* Input fields for editing */}
+                  {/* ... (previous code) */}
+                  <button onClick={() => handleEditUser(user.id, editedUserData)}>Save</button>
+                </div>
+              )}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+};
+
+export default App;
